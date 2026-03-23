@@ -447,17 +447,36 @@
             position: fixed;
             bottom: 0;
             left: 10px;
-            width: 140px;
+            width: 220px;
             z-index: 10;
             filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.5));
+            transform-origin: bottom center;
+            transition: transform 0.1s;
         }
         .pikachu-right {
             position: fixed;
             bottom: 0;
             right: 10px;
-            width: 130px;
+            width: 200px;
             z-index: 10;
             filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.5));
+            transform-origin: bottom center;
+            transition: transform 0.1s;
+        }
+        /* Bounce on kick */
+        .pikachu-left.bounce {
+            transform: scaleY(0.88) scaleX(1.08) translateY(4px);
+        }
+        /* Jump on snare */
+        .pikachu-right.jump {
+            transform: translateY(-20px) rotate(5deg);
+        }
+        /* Hat wiggle */
+        .pikachu-left.wiggle {
+            transform: rotate(-6deg);
+        }
+        .pikachu-right.wiggle {
+            transform: rotate(6deg);
         }
 
         /* Lightning bolt ears on machine corners */
@@ -813,6 +832,40 @@ function playSample(trackIdx, time, accent) {
     if (icon) {
         icon.classList.add('flash');
         setTimeout(() => icon.classList.remove('flash'), 120);
+    }
+
+    // Pikachu reacts to the music
+    const n = track.name.toLowerCase();
+    const pikaL = document.querySelector('.pikachu-left');
+    const pikaR = document.querySelector('.pikachu-right');
+    if (n.includes('kick')) {
+        // Kick = both Pikachus squish/bounce
+        pikaL.classList.remove('bounce','wiggle');
+        pikaR.classList.remove('jump','wiggle');
+        void pikaL.offsetWidth;
+        pikaL.classList.add('bounce');
+        pikaR.classList.add('bounce');
+        setTimeout(() => { pikaL.classList.remove('bounce'); pikaR.classList.remove('bounce'); }, 100);
+    } else if (n.includes('snare') || n.includes('clap') || n.includes('rim')) {
+        // Snare = right Pikachu jumps
+        pikaR.classList.remove('jump','bounce','wiggle');
+        void pikaR.offsetWidth;
+        pikaR.classList.add('jump');
+        setTimeout(() => pikaR.classList.remove('jump'), 120);
+    } else if (n.includes('hat') || n.includes('ride') || n.includes('cymbal')) {
+        // Hat/ride/cymbal = both wiggle
+        pikaL.classList.remove('bounce','wiggle');
+        pikaR.classList.remove('jump','wiggle');
+        void pikaL.offsetWidth;
+        pikaL.classList.add('wiggle');
+        pikaR.classList.add('wiggle');
+        setTimeout(() => { pikaL.classList.remove('wiggle'); pikaR.classList.remove('wiggle'); }, 80);
+    } else if (n.includes('tom') || n.includes('floor')) {
+        // Toms = left Pikachu bounces
+        pikaL.classList.remove('bounce','wiggle');
+        void pikaL.offsetWidth;
+        pikaL.classList.add('bounce');
+        setTimeout(() => pikaL.classList.remove('bounce'), 100);
     }
 }
 
