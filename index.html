@@ -385,13 +385,19 @@
             display: flex;
             gap: 3px;
         }
+        .pat-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
         .pat-btn {
-            width: 24px;
-            height: 18px;
+            width: 28px;
+            height: 20px;
             background: rgba(0,0,0,0.3);
             border: 2px solid rgba(255,255,255,0.3);
             color: #fff;
-            font-size: 11px;
+            font-size: 12px;
             font-family: Arial, sans-serif;
             font-weight: 700;
             display: flex;
@@ -402,6 +408,24 @@
             background: #FFCB05;
             color: #1a1a1a;
             border-color: #1a1a1a;
+        }
+        /* Chain light under each pattern button */
+        .chain-light {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.4);
+        }
+        .chain-light.lit {
+            background: #2563EB;
+            border-color: #fff;
+            box-shadow: 0 0 6px #2563EB, 0 0 12px rgba(37,99,235,0.4);
+        }
+        .chain-light.playing {
+            background: #FFCB05;
+            border-color: #fff;
+            box-shadow: 0 0 8px #FFCB05, 0 0 16px rgba(255,203,5,0.5);
         }
 
         /* KIT DROPDOWN */
@@ -582,10 +606,22 @@
             </div>
         </div>
         <div class="pattern-btns">
-            <div class="pat-btn active-pat" data-pat="0">A</div>
-            <div class="pat-btn" data-pat="1">B</div>
-            <div class="pat-btn" data-pat="2">C</div>
-            <div class="pat-btn" data-pat="3">D</div>
+            <div class="pat-wrap">
+                <div class="pat-btn active-pat" data-pat="0">A</div>
+                <div class="chain-light lit" data-chain="0"></div>
+            </div>
+            <div class="pat-wrap">
+                <div class="pat-btn" data-pat="1">B</div>
+                <div class="chain-light" data-chain="1"></div>
+            </div>
+            <div class="pat-wrap">
+                <div class="pat-btn" data-pat="2">C</div>
+                <div class="chain-light" data-chain="2"></div>
+            </div>
+            <div class="pat-wrap">
+                <div class="pat-btn" data-pat="3">D</div>
+                <div class="chain-light" data-chain="3"></div>
+            </div>
         </div>
     </div>
 
@@ -789,6 +825,7 @@ initPatternsForKit(currentKit);
 function patterns() { return allPatterns[currentKit]; }
 
 let patternClipboard = null;
+let patternChain = [true, false, false, false]; // which patterns are in the chain
 
 let trackVolumes = TRACKS.map(() => 0.8);
 let trackMutes = TRACKS.map(() => false);
@@ -843,12 +880,18 @@ function playSample(trackIdx, time, accent) {
     const track = TRACKS[trackIdx];
     const buf = buffers[currentKit + '/' + track.file];
     if (!buf || trackMutes[trackIdx]) return;
+
+    // Polyphonic: each hit gets its own gain node so overlapping hits don't clip
+    const voiceGain = actx.createGain();
+    const vol = accent ? 1.0 : trackVolumes[trackIdx];
+    voiceGain.gain.value = vol;
+    voiceGain.connect(trackGains[trackIdx]);
+
     const source = actx.createBufferSource();
     source.buffer = buf;
-    source.connect(trackGains[trackIdx]);
-    const vol = accent ? 1.0 : trackVolumes[trackIdx];
-    trackGains[trackIdx].gain.setValueAtTime(vol, time);
+    source.connect(voiceGain);
     source.start(time);
+    source.onended = () => { try { voiceGain.disconnect(); } catch(e) {} };
 
     // Flash the drum icon for this track
     const icon = document.querySelector(`.drum-icon[data-track="${trackIdx}"]`);
@@ -991,11 +1034,52 @@ function getSwingDelay(step) {
     return 0;
 }
 
+function getNextChainPattern() {
+    // Find next lit pattern after current
+    const chainedPats = [];
+    for (let i = 0; i < NUM_PATTERNS; i++) {
+        if (patternChain[i]) chainedPats.push(i);
+    }
+    if (chainedPats.length <= 1) return currentPattern;
+    const idx = chainedPats.indexOf(currentPattern);
+    return chainedPats[(idx + 1) % chainedPats.length];
+}
+
+function switchToPattern(patIdx) {
+    currentPattern = patIdx;
+    document.querySelectorAll('.pat-btn').forEach(b => b.classList.remove('active-pat'));
+    const btn = document.querySelector(`.pat-btn[data-pat="${patIdx}"]`);
+    if (btn) btn.classList.add('active-pat');
+    refreshGrid();
+    updateChainLights();
+}
+
+function updateChainLights() {
+    document.querySelectorAll('.chain-light').forEach(el => {
+        const idx = parseInt(el.dataset.chain);
+        el.classList.toggle('lit', patternChain[idx]);
+        el.classList.toggle('playing', playing && idx === currentPattern);
+    });
+}
+
 function nextStep() {
     const secondsPer16th = 60 / bpm / 4;
 
     while (nextStepTime < actx.currentTime + 0.1) {
         currentStep = (currentStep + 1) % STEPS;
+
+        // Auto-advance pattern chain when we loop back to step 0
+        if (currentStep === 0 && playing) {
+            const chainCount = patternChain.filter(Boolean).length;
+            if (chainCount > 1) {
+                const next = getNextChainPattern();
+                if (next !== currentPattern) {
+                    const stepRef = currentStep;
+                    setTimeout(() => switchToPattern(next), 0);
+                }
+            }
+        }
+
         const swingDelay = getSwingDelay(currentStep);
         const time = nextStepTime + swingDelay;
 
@@ -1031,6 +1115,7 @@ function startSequencer() {
     currentStep = -1;
     nextStepTime = actx.currentTime;
     document.getElementById('btnPlay').classList.add('play-on');
+    updateChainLights();
     nextStep();
 }
 
@@ -1042,6 +1127,7 @@ function stopSequencer() {
     document.querySelectorAll('.ph-cell').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.step.current').forEach(el => el.classList.remove('current'));
     document.getElementById('stepDisplay').textContent = 'STEP --';
+    updateChainLights();
 }
 
 // ============================================
@@ -1122,13 +1208,24 @@ document.getElementById('masterVol').addEventListener('input', (e) => {
     masterGain.gain.value = e.target.value / 100;
 });
 
-// Pattern switching
+// Pattern switching (click button = select, click light = toggle chain)
 document.querySelectorAll('.pat-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         currentPattern = parseInt(btn.dataset.pat);
         document.querySelectorAll('.pat-btn').forEach(b => b.classList.remove('active-pat'));
         btn.classList.add('active-pat');
         refreshGrid();
+        updateChainLights();
+    });
+});
+document.querySelectorAll('.chain-light').forEach(light => {
+    light.addEventListener('click', () => {
+        const idx = parseInt(light.dataset.chain);
+        // Don't allow turning off the last lit pattern
+        const litCount = patternChain.filter(Boolean).length;
+        if (patternChain[idx] && litCount <= 1) return;
+        patternChain[idx] = !patternChain[idx];
+        updateChainLights();
     });
 });
 
