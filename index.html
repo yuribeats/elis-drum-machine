@@ -133,13 +133,13 @@
         }
         .ctrl-input:focus { border-color: #fff; }
         .ctrl-btn {
-            height: 24px;
+            height: 26px;
             padding: 0 14px;
             background: #333;
             border: 2px solid #555;
             color: #fff;
             font-family: Arial, sans-serif;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -149,8 +149,8 @@
         }
         .ctrl-btn:active { background: #444; }
         .ctrl-btn.play-on {
-            background: #E3350D;
-            border-color: #ff4422;
+            background: #2563EB;
+            border-color: #3b82f6;
             color: #fff;
         }
         .ctrl-sep { width: 1px; height: 20px; background: #444; }
@@ -158,7 +158,7 @@
             -webkit-appearance: none;
             appearance: none;
             width: 60px;
-            height: 3px;
+            height: 4px;
             background: #0a0a0a;
             border: 1px solid #333;
             outline: none;
@@ -166,22 +166,22 @@
         .ctrl-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 8px;
-            height: 16px;
+            width: 10px;
+            height: 18px;
             background: #FFCB05;
-            border: 1px solid #1a1a1a;
+            border: 2px solid #1a1a1a;
         }
 
         /* BEAT INDICATOR */
         .beat-row {
             display: flex;
-            padding: 6px 20px 2px 140px;
+            padding: 6px 20px 2px 156px;
             gap: 0;
         }
         .beat-num {
             width: 46px;
             text-align: center;
-            font-size: 10px;
+            font-size: 11px;
             color: #1a1a1a;
             letter-spacing: 1px;
         }
@@ -195,13 +195,13 @@
         .track {
             display: flex;
             align-items: center;
-            height: 34px;
+            height: 36px;
             border-bottom: 1px solid rgba(0,0,0,0.15);
         }
         .track:last-child { border-bottom: none; }
         .track-label {
-            width: 120px;
-            font-size: 11px;
+            width: 136px;
+            font-size: 12px;
             color: #1a1a1a;
             letter-spacing: 1px;
             padding-right: 10px;
@@ -212,33 +212,56 @@
             justify-content: flex-end;
             gap: 6px;
         }
+
+        /* DRUM PIECE ICON */
+        .drum-icon {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+        .drum-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
         .track-vol {
             -webkit-appearance: none;
             appearance: none;
             width: 30px;
-            height: 2px;
+            height: 3px;
             background: rgba(0,0,0,0.3);
             outline: none;
         }
         .track-vol::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 6px;
-            height: 10px;
+            width: 8px;
+            height: 12px;
             background: #1a1a1a;
             border: 1px solid #000;
         }
+
+        /* MUTE: uses shape not just color */
         .track-mute {
-            width: 10px;
-            height: 10px;
-            background: #E3350D;
-            border: 1px solid #aa2200;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #1a1a1a;
             flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            line-height: 1;
+            background: #fff;
         }
         .track-mute.muted {
-            background: #8B7500;
-            border-color: #665500;
+            background: #1a1a1a;
+            color: #FFCB05;
         }
+        .track-mute.muted::after {
+            content: 'X';
+        }
+
         .steps {
             display: flex;
             gap: 0;
@@ -246,133 +269,98 @@
         }
         .step-group-gap { width: 8px; flex-shrink: 0; }
 
-        /* TRACK OFFSET CONTROLS */
-        .track-offset {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            padding-left: 6px;
-            flex-shrink: 0;
-        }
-        .offset-slider {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 36px;
-            height: 2px;
-            background: rgba(0,0,0,0.3);
-            outline: none;
-        }
-        .offset-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 6px;
-            height: 10px;
-            background: #1a1a1a;
-            border: 1px solid #000;
-        }
-        .offset-val {
-            font-size: 9px;
-            color: #1a1a1a;
-            width: 24px;
-            text-align: center;
-            letter-spacing: 0;
-        }
-        .offset-mode {
-            width: 18px;
-            height: 12px;
-            font-size: 8px;
-            font-family: Arial, sans-serif;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0,0,0,0.15);
-            border: 1px solid rgba(0,0,0,0.3);
-            color: #1a1a1a;
-            letter-spacing: 0;
-        }
-        .offset-mode.mode-odd { color: #E3350D; border-color: #aa2200; }
-        .offset-mode.mode-even { color: #3B4CCA; border-color: #2a3599; }
-        .offset-mode.mode-all { color: #1a1a1a; border-color: #000; }
-
-        /* STEP CELLS — white background like bottom of pokeball */
+        /* ==========================================
+           COLOR-BLIND SAFE STEP CELLS
+           Blue (#2563EB) = ON
+           Orange (#F59E0B) = ACCENT
+           White = OFF
+           Shape changes reinforce state
+           ========================================== */
         .step {
             width: 46px;
-            height: 28px;
+            height: 30px;
             background: #fff;
-            border: 1px solid #ddd;
+            border: 2px solid #ccc;
             position: relative;
-            transition: background 0.05s;
+            transition: background 0.05s, border-color 0.05s;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .step.on {
-            background: #E3350D;
-            border-color: #cc2200;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+            background: #2563EB;
+            border-color: #1d4ed8;
         }
         .step.on.accent {
-            background: #FFCB05;
-            border-color: #ddb000;
-        }
-        .step.on.accent .step-dot {
-            border-color: #1a1a1a;
-        }
-        .step.current {
-            border-color: #1a1a1a;
-            box-shadow: 0 0 6px rgba(0,0,0,0.3);
-        }
-        .step.on.current {
-            background: #ff4422;
-            box-shadow: 0 0 8px rgba(227,53,13,0.5);
+            background: #F59E0B;
+            border-color: #d97706;
         }
 
-        /* POKEBALL DOT */
+        /* Current step — thick white dashed border, visible on any color */
+        .step.current {
+            border: 2px dashed #fff;
+            box-shadow: 0 0 8px rgba(255,255,255,0.6);
+        }
+        .step.on.current {
+            border: 2px dashed #fff;
+            box-shadow: 0 0 10px rgba(37,99,235,0.7);
+        }
+        .step.on.accent.current {
+            box-shadow: 0 0 10px rgba(245,158,11,0.7);
+        }
+
+        /* POKEBALL DOT — OFF = small empty circle, ON = filled pokeball */
         .step-dot {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            background: linear-gradient(180deg, #E3350D 0%, #E3350D 45%, #1a1a1a 45%, #1a1a1a 55%, #fff 55%, #fff 100%);
-            border: 1.5px solid #aaa;
+            border: 1.5px solid #bbb;
+            background: transparent;
             position: relative;
         }
-        .step-dot::after {
+        /* ON: filled pokeball with visible halves */
+        .step.on .step-dot {
+            width: 14px;
+            height: 14px;
+            background: linear-gradient(180deg, #fff 0%, #fff 42%, #1a1a1a 42%, #1a1a1a 58%, #E3350D 58%, #E3350D 100%);
+            border: 2px solid #fff;
+            box-shadow: 0 0 4px rgba(255,255,255,0.8);
+        }
+        .step.on .step-dot::after {
             content: '';
             position: absolute;
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
-            width: 3px;
-            height: 3px;
+            width: 4px;
+            height: 4px;
             border-radius: 50%;
             background: #fff;
-            border: 0.5px solid #888;
+            border: 1px solid #1a1a1a;
         }
-        .step.on .step-dot {
-            background: linear-gradient(180deg, #fff 0%, #fff 45%, #1a1a1a 45%, #1a1a1a 55%, #E3350D 55%, #E3350D 100%);
-            border-color: #fff;
-            box-shadow: 0 0 4px rgba(255,255,255,0.6);
+        .step.on.accent .step-dot {
+            background: linear-gradient(180deg, #1a1a1a 0%, #1a1a1a 42%, #fff 42%, #fff 58%, #1a1a1a 58%, #1a1a1a 100%);
+            border-color: #1a1a1a;
         }
-        .step.on .step-dot::after {
+        .step.on.accent .step-dot::after {
             background: #FFCB05;
-            border-color: #fff;
+            border-color: #1a1a1a;
         }
 
         /* PLAYHEAD ROW */
         .playhead-row {
             display: flex;
-            padding: 0 20px 6px 140px;
+            padding: 0 20px 6px 156px;
             gap: 0;
         }
         .ph-cell {
             width: 46px;
-            height: 4px;
+            height: 5px;
             background: transparent;
         }
         .ph-cell.active {
-            background: #E3350D;
-            box-shadow: 0 0 6px #E3350D;
+            background: #fff;
+            box-shadow: 0 0 8px #fff, 0 0 16px rgba(255,203,5,0.6);
         }
         .ph-group-gap { width: 8px; }
 
@@ -397,12 +385,12 @@
             gap: 3px;
         }
         .pat-btn {
-            width: 22px;
-            height: 16px;
+            width: 24px;
+            height: 18px;
             background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 2px solid rgba(255,255,255,0.3);
             color: #fff;
-            font-size: 10px;
+            font-size: 11px;
             font-family: Arial, sans-serif;
             font-weight: 700;
             display: flex;
@@ -419,7 +407,7 @@
         .kit-dropdown { position: relative; }
         .kit-selected {
             background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 2px solid rgba(255,255,255,0.3);
             color: #FFCB05;
             font-family: Arial, sans-serif;
             font-size: 12px;
@@ -437,13 +425,13 @@
             left: 0;
             right: 0;
             background: #1a1a1a;
-            border: 1px solid #444;
+            border: 2px solid #444;
             border-top: none;
             z-index: 100;
         }
         .kit-menu.open { display: block; }
         .kit-option {
-            padding: 4px 8px;
+            padding: 5px 8px;
             font-size: 12px;
             font-weight: 700;
             font-family: Arial, sans-serif;
@@ -482,6 +470,43 @@
         }
         .bolt-left { left: 15px; transform: rotate(-15deg); }
         .bolt-right { right: 15px; transform: rotate(15deg); }
+
+        /* DRUM KIT DIAGRAM */
+        .kit-diagram {
+            position: relative;
+            width: 260px;
+            height: 180px;
+            margin: 0 auto;
+            display: none;
+        }
+        .kit-diagram.visible { display: block; }
+        .kit-piece {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            transition: transform 0.1s, filter 0.1s;
+        }
+        .kit-piece.hit {
+            transform: scale(1.15);
+            filter: drop-shadow(0 0 8px #FFCB05);
+        }
+        .kit-piece-shape {
+            border: 2px solid #1a1a1a;
+            background: #fff;
+        }
+        .kit-piece.hit .kit-piece-shape {
+            background: #2563EB;
+            border-color: #fff;
+        }
+        .kit-piece-label {
+            font-size: 7px;
+            color: #1a1a1a;
+            letter-spacing: 0.5px;
+            text-align: center;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -503,9 +528,10 @@
         <div class="ctrl-group" style="margin-right:12px;position:relative">
             <span class="ctrl-label" style="color:#fff">KIT</span>
             <div class="kit-dropdown" id="kitDropdown">
-                <div class="kit-selected" id="kitSelected">CR-78</div>
+                <div class="kit-selected" id="kitSelected">ELI'S KIT</div>
                 <div class="kit-menu" id="kitMenu">
-                    <div class="kit-option active-kit" data-kit="cr78">CR-78</div>
+                    <div class="kit-option active-kit" data-kit="eli">ELI'S KIT</div>
+                    <div class="kit-option" data-kit="cr78">CR-78</div>
                     <div class="kit-option" data-kit="lm2">LM-2</div>
                     <div class="kit-option" data-kit="mrk2">MRK-2</div>
                     <div class="kit-option" data-kit="tr505">TR-505</div>
@@ -565,17 +591,63 @@
 
     <div class="footer">
         <span class="footer-text" id="footerSrc">SAMPLES: ORAMICS / CR-78 PUBLIC DOMAIN</span>
-        <span class="footer-text">SPACE = PLAY/STOP</span>
+        <span class="footer-text">SPACE = PLAY/STOP &nbsp; SHIFT+CLICK = ACCENT</span>
     </div>
 </div>
 </div>
 
 <script>
 // ============================================
+// DRUM PIECE SVG ICONS (for track labels)
+// Maps track name keywords to simple SVG icons
+// ============================================
+const DRUM_ICONS = {
+    kick: '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="#1a1a1a" stroke-width="2"/><circle cx="10" cy="10" r="3" fill="#1a1a1a"/></svg>',
+    snare: '<svg viewBox="0 0 20 20"><ellipse cx="10" cy="10" rx="8" ry="5" fill="none" stroke="#1a1a1a" stroke-width="2"/><line x1="4" y1="8" x2="16" y2="12" stroke="#1a1a1a" stroke-width="1"/><line x1="4" y1="12" x2="16" y2="8" stroke="#1a1a1a" stroke-width="1"/></svg>',
+    clap: '<svg viewBox="0 0 20 20"><ellipse cx="10" cy="10" rx="8" ry="5" fill="none" stroke="#1a1a1a" stroke-width="2"/><line x1="4" y1="8" x2="16" y2="12" stroke="#1a1a1a" stroke-width="1"/><line x1="4" y1="12" x2="16" y2="8" stroke="#1a1a1a" stroke-width="1"/></svg>',
+    hat: '<svg viewBox="0 0 20 20"><ellipse cx="10" cy="8" rx="8" ry="3" fill="none" stroke="#1a1a1a" stroke-width="2"/><ellipse cx="10" cy="12" rx="8" ry="3" fill="none" stroke="#1a1a1a" stroke-width="2"/></svg>',
+    cymbal: '<svg viewBox="0 0 20 20"><ellipse cx="10" cy="10" rx="9" ry="4" fill="none" stroke="#1a1a1a" stroke-width="2"/><circle cx="10" cy="10" r="1.5" fill="#1a1a1a"/></svg>',
+    crash: '<svg viewBox="0 0 20 20"><ellipse cx="10" cy="10" rx="9" ry="4" fill="none" stroke="#1a1a1a" stroke-width="2"/><circle cx="10" cy="10" r="1.5" fill="#1a1a1a"/><line x1="6" y1="5" x2="8" y2="7" stroke="#1a1a1a" stroke-width="1.5"/><line x1="14" y1="5" x2="12" y2="7" stroke="#1a1a1a" stroke-width="1.5"/></svg>',
+    ride: '<svg viewBox="0 0 20 20"><ellipse cx="10" cy="10" rx="9" ry="4" fill="none" stroke="#1a1a1a" stroke-width="2"/><circle cx="10" cy="10" r="1.5" fill="#1a1a1a"/></svg>',
+    tom: '<svg viewBox="0 0 20 20"><ellipse cx="10" cy="7" rx="7" ry="3" fill="none" stroke="#1a1a1a" stroke-width="2"/><line x1="3" y1="7" x2="3" y2="14" stroke="#1a1a1a" stroke-width="2"/><line x1="17" y1="7" x2="17" y2="14" stroke="#1a1a1a" stroke-width="2"/><ellipse cx="10" cy="14" rx="7" ry="3" fill="none" stroke="#1a1a1a" stroke-width="2"/></svg>',
+    rim: '<svg viewBox="0 0 20 20"><ellipse cx="10" cy="10" rx="8" ry="5" fill="none" stroke="#1a1a1a" stroke-width="2"/><line x1="16" y1="6" x2="4" y2="14" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/></svg>',
+    cowbell: '<svg viewBox="0 0 20 20"><polygon points="6,4 14,4 16,16 4,16" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-linejoin="round"/></svg>',
+    conga: '<svg viewBox="0 0 20 20"><ellipse cx="10" cy="5" rx="5" ry="2.5" fill="none" stroke="#1a1a1a" stroke-width="2"/><line x1="5" y1="5" x2="5" y2="16" stroke="#1a1a1a" stroke-width="2"/><line x1="15" y1="5" x2="15" y2="16" stroke="#1a1a1a" stroke-width="2"/><ellipse cx="10" cy="16" rx="5" ry="2.5" fill="none" stroke="#1a1a1a" stroke-width="2"/></svg>',
+    bongo: '<svg viewBox="0 0 20 20"><ellipse cx="7" cy="10" rx="4" ry="6" fill="none" stroke="#1a1a1a" stroke-width="2"/><ellipse cx="14" cy="10" rx="4" ry="6" fill="none" stroke="#1a1a1a" stroke-width="2"/></svg>',
+    tamb: '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" fill="none" stroke="#1a1a1a" stroke-width="2"/><circle cx="5" cy="10" r="1.5" fill="#1a1a1a"/><circle cx="15" cy="10" r="1.5" fill="#1a1a1a"/><circle cx="10" cy="5" r="1.5" fill="#1a1a1a"/></svg>',
+    guiro: '<svg viewBox="0 0 20 20"><ellipse cx="10" cy="10" rx="8" ry="4" fill="none" stroke="#1a1a1a" stroke-width="2"/><line x1="6" y1="9" x2="6" y2="11" stroke="#1a1a1a" stroke-width="1.5"/><line x1="9" y1="9" x2="9" y2="11" stroke="#1a1a1a" stroke-width="1.5"/><line x1="12" y1="9" x2="12" y2="11" stroke="#1a1a1a" stroke-width="1.5"/></svg>',
+    clave: '<svg viewBox="0 0 20 20"><line x1="3" y1="14" x2="10" y2="4" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/><line x1="10" y1="16" x2="17" y2="6" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/></svg>',
+    block: '<svg viewBox="0 0 20 20"><rect x="3" y="6" width="14" height="8" rx="1" fill="none" stroke="#1a1a1a" stroke-width="2"/></svg>',
+};
+
+function getDrumIcon(trackName) {
+    const n = trackName.toLowerCase();
+    for (const key of Object.keys(DRUM_ICONS)) {
+        if (n.includes(key)) return DRUM_ICONS[key];
+    }
+    // Default: simple circle
+    return '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" fill="none" stroke="#1a1a1a" stroke-width="2"/></svg>';
+}
+
+// ============================================
 // KITS
 // ============================================
 const SAMPLE_BASE = 'samples/';
 const KITS = {
+    eli: {
+        name: "ELI'S", model: 'KIT',
+        path: 'LM-2/',
+        tracks: [
+            {name:'KICK', file:'kick.wav'},
+            {name:'SNARE', file:'snare-h.wav'},
+            {name:'HI-HAT CLOSED', file:'hihat-closed.wav'},
+            {name:'HI-HAT OPEN', file:'hihat-open.wav'},
+            {name:'TOM 1', file:'tom-h.wav'},
+            {name:'TOM 2', file:'tom-m.wav'},
+            {name:'FLOOR TOM', file:'tom-l.wav'},
+            {name:'RIDE', file:'ride.wav'},
+        ]
+    },
     cr78: {
         name: 'ROLAND', model: 'CR-78',
         path: 'CR-78/',
@@ -643,7 +715,7 @@ const KITS = {
     }
 };
 
-let currentKit = 'cr78';
+let currentKit = 'eli';
 let TRACKS = KITS[currentKit].tracks;
 var STEPS = 16;
 const NUM_PATTERNS = 4;
@@ -678,8 +750,6 @@ let patternClipboard = null;
 
 let trackVolumes = TRACKS.map(() => 0.8);
 let trackMutes = TRACKS.map(() => false);
-let trackOffsets = TRACKS.map(() => 0);
-let trackOffsetModes = TRACKS.map(() => 'all');
 
 const actx = new (window.AudioContext || window.webkitAudioContext)();
 const masterGain = actx.createGain();
@@ -713,8 +783,6 @@ async function switchKit(kitId) {
     initPatternsForKit(kitId);
     trackVolumes = TRACKS.map(() => 0.8);
     trackMutes = TRACKS.map(() => false);
-    trackOffsets = TRACKS.map(() => 0);
-    trackOffsetModes = TRACKS.map(() => 'all');
     trackGains.forEach(g => g.disconnect());
     trackGains = [];
     for (let t = 0; t < TRACKS.length; t++) {
@@ -739,6 +807,13 @@ function playSample(trackIdx, time, accent) {
     const vol = accent ? 1.0 : trackVolumes[trackIdx];
     trackGains[trackIdx].gain.setValueAtTime(vol, time);
     source.start(time);
+
+    // Flash the drum icon for this track
+    const icon = document.querySelector(`.drum-icon[data-track="${trackIdx}"]`);
+    if (icon) {
+        icon.classList.add('flash');
+        setTimeout(() => icon.classList.remove('flash'), 120);
+    }
 }
 
 // ============================================
@@ -778,6 +853,13 @@ function buildGrid() {
         const label = document.createElement('div');
         label.className = 'track-label';
 
+        // Drum piece icon
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'drum-icon';
+        iconDiv.dataset.track = t;
+        iconDiv.innerHTML = getDrumIcon(TRACKS[t].name);
+
+        // Mute button (X when muted, empty when active)
         const mute = document.createElement('div');
         mute.className = 'track-mute' + (trackMutes[t] ? ' muted' : '');
         mute.addEventListener('click', () => {
@@ -794,6 +876,7 @@ function buildGrid() {
         const nameSpan = document.createElement('span');
         nameSpan.textContent = TRACKS[t].name;
 
+        label.appendChild(iconDiv);
         label.appendChild(mute);
         label.appendChild(vol);
         label.appendChild(nameSpan);
@@ -838,47 +921,6 @@ function buildGrid() {
         }
         row.appendChild(steps);
 
-        // Offset controls
-        const offsetDiv = document.createElement('div');
-        offsetDiv.className = 'track-offset';
-
-        const offsetSlider = document.createElement('input');
-        offsetSlider.type = 'range';
-        offsetSlider.className = 'offset-slider';
-        offsetSlider.min = -50; offsetSlider.max = 50; offsetSlider.value = trackOffsets[t];
-
-        const offsetVal = document.createElement('span');
-        offsetVal.className = 'offset-val';
-        offsetVal.textContent = trackOffsets[t] + 'MS';
-
-        offsetSlider.addEventListener('input', () => {
-            trackOffsets[t] = parseInt(offsetSlider.value);
-            offsetVal.textContent = trackOffsets[t] + 'MS';
-        });
-        offsetSlider.addEventListener('dblclick', () => {
-            trackOffsets[t] = 0;
-            offsetSlider.value = 0;
-            offsetVal.textContent = '0MS';
-        });
-
-        const modeBtn = document.createElement('div');
-        modeBtn.className = 'offset-mode mode-all';
-        modeBtn.textContent = 'ALL';
-        const modes = ['all', 'odd', 'even'];
-        const modeLabels = ['ALL', 'ODD', 'EVN'];
-        modeBtn.addEventListener('click', () => {
-            const idx = modes.indexOf(trackOffsetModes[t]);
-            const next = (idx + 1) % 3;
-            trackOffsetModes[t] = modes[next];
-            modeBtn.textContent = modeLabels[next];
-            modeBtn.className = 'offset-mode mode-' + modes[next];
-        });
-
-        offsetDiv.appendChild(offsetSlider);
-        offsetDiv.appendChild(offsetVal);
-        offsetDiv.appendChild(modeBtn);
-        row.appendChild(offsetDiv);
-
         grid.appendChild(row);
     }
 }
@@ -913,19 +955,9 @@ function nextStep() {
         const time = nextStepTime + swingDelay;
 
         const pat = patterns()[currentPattern];
-        const beatNum = Math.floor(currentStep / 4) + 1;
         for (let t = 0; t < TRACKS.length; t++) {
             if (pat[t][currentStep] > 0) {
-                let trackTime = time;
-                const mode = trackOffsetModes[t];
-                const offset = trackOffsets[t];
-                if (offset !== 0) {
-                    const apply = mode === 'all' ||
-                        (mode === 'odd' && beatNum % 2 === 1) ||
-                        (mode === 'even' && beatNum % 2 === 0);
-                    if (apply) trackTime += offset / 1000;
-                }
-                playSample(t, trackTime, pat[t][currentStep] === 2);
+                playSample(t, time, pat[t][currentStep] === 2);
             }
         }
 
@@ -1098,6 +1130,11 @@ for (let t = 0; t < TRACKS.length; t++) {
     g.connect(masterGain);
     trackGains.push(g);
 }
+
+// Add flash style for drum icons
+const flashStyle = document.createElement('style');
+flashStyle.textContent = '.drum-icon.flash svg circle, .drum-icon.flash svg ellipse, .drum-icon.flash svg rect, .drum-icon.flash svg polygon, .drum-icon.flash svg line { stroke: #2563EB !important; fill: #2563EB !important; } .drum-icon.flash { filter: drop-shadow(0 0 6px #2563EB); transform: scale(1.2); transition: transform 0.05s; }';
+document.head.appendChild(flashStyle);
 
 buildGrid();
 loadSamples().then(() => {
