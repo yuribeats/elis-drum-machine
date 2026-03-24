@@ -852,7 +852,7 @@ function loadState() {
         const raw = localStorage.getItem('eliDrumState');
         if (!raw) return false;
         const state = JSON.parse(raw);
-        if (state.bpm) { bpm = state.bpm; }
+        if (state.bpm) { bpm = Math.round(state.bpm); }
         if (state.swing !== undefined) { swing = state.swing; }
         if (state.patternChain) { patternChain = state.patternChain; }
         if (state.currentKit && KITS[state.currentKit]) { currentKit = state.currentKit; TRACKS = KITS[currentKit].tracks; }
