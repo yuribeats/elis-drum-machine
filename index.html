@@ -827,6 +827,58 @@ function patterns() { return allPatterns[currentKit]; }
 let patternClipboard = null;
 let patternChain = [true, false, false, false]; // which patterns are in the chain
 
+// ============================================
+// SAVE / LOAD (localStorage)
+// ============================================
+function saveState() {
+    const state = {
+        currentKit,
+        currentPattern,
+        bpm,
+        swing,
+        patternChain,
+        allPatterns: {},
+    };
+    for (const kitId of Object.keys(allPatterns)) {
+        state.allPatterns[kitId] = allPatterns[kitId].map(pat =>
+            pat.map(track => Array.from(track))
+        );
+    }
+    try { localStorage.setItem('eliDrumState', JSON.stringify(state)); } catch(e) {}
+}
+
+function loadState() {
+    try {
+        const raw = localStorage.getItem('eliDrumState');
+        if (!raw) return false;
+        const state = JSON.parse(raw);
+        if (state.bpm) { bpm = state.bpm; }
+        if (state.swing !== undefined) { swing = state.swing; }
+        if (state.patternChain) { patternChain = state.patternChain; }
+        if (state.currentKit && KITS[state.currentKit]) { currentKit = state.currentKit; TRACKS = KITS[currentKit].tracks; }
+        if (state.currentPattern !== undefined) { currentPattern = state.currentPattern; }
+        if (state.allPatterns) {
+            for (const kitId of Object.keys(state.allPatterns)) {
+                if (!KITS[kitId]) continue;
+                const saved = state.allPatterns[kitId];
+                const kit = KITS[kitId];
+                allPatterns[kitId] = saved.map((pat, p) =>
+                    pat.map((track, t) => {
+                        if (t >= kit.tracks.length) return null;
+                        const arr = new Uint8Array(STEPS);
+                        for (let i = 0; i < Math.min(track.length, STEPS); i++) arr[i] = track[i];
+                        return arr;
+                    }).filter(Boolean)
+                );
+            }
+        }
+        return true;
+    } catch(e) {
+        console.error('Failed to load state:', e);
+        return false;
+    }
+}
+
 let trackVolumes = TRACKS.map(() => 0.8);
 let trackMutes = TRACKS.map(() => false);
 
@@ -1003,6 +1055,7 @@ function buildGrid() {
                     pat[s] = 0;
                     step.classList.remove('on', 'accent');
                 }
+                saveState();
             });
 
             steps.appendChild(step);
@@ -1140,6 +1193,7 @@ document.getElementById('btnStop').addEventListener('click', stopSequencer);
 document.getElementById('btnClear').addEventListener('click', () => {
     patterns()[currentPattern].forEach(t => t.fill(0));
     refreshGrid();
+    saveState();
 });
 document.getElementById('btnRandom').addEventListener('click', () => {
     const pat = patterns()[currentPattern];
@@ -1167,6 +1221,7 @@ document.getElementById('btnRandom').addEventListener('click', () => {
         for (let s = 0; s < STEPS; s++) { if (Math.random() < 0.08) pat[t][s] = 1; }
     }
     refreshGrid();
+    saveState();
 });
 document.getElementById('btnCopy').addEventListener('click', () => {
     const pat = patterns()[currentPattern];
@@ -1189,6 +1244,7 @@ document.getElementById('btnPaste').addEventListener('click', () => {
         pat[t].fill(0);
     }
     refreshGrid();
+    saveState();
     document.getElementById('btnPaste').style.borderColor = '#FFCB05';
     document.getElementById('btnPaste').style.color = '#FFCB05';
     setTimeout(() => {
@@ -1199,10 +1255,12 @@ document.getElementById('btnPaste').addEventListener('click', () => {
 
 document.getElementById('tempoInput').addEventListener('change', (e) => {
     bpm = Math.max(40, Math.min(300, parseInt(e.target.value) || 120));
+    saveState();
 });
 document.getElementById('swingSlider').addEventListener('input', (e) => {
     swing = parseInt(e.target.value);
     document.getElementById('swingVal').textContent = swing + '%';
+    saveState();
 });
 document.getElementById('masterVol').addEventListener('input', (e) => {
     masterGain.gain.value = e.target.value / 100;
@@ -1216,6 +1274,7 @@ document.querySelectorAll('.pat-btn').forEach(btn => {
         btn.classList.add('active-pat');
         refreshGrid();
         updateChainLights();
+        saveState();
     });
 });
 document.querySelectorAll('.chain-light').forEach(light => {
@@ -1226,6 +1285,7 @@ document.querySelectorAll('.chain-light').forEach(light => {
         if (patternChain[idx] && litCount <= 1) return;
         patternChain[idx] = !patternChain[idx];
         updateChainLights();
+        saveState();
     });
 });
 
@@ -1239,7 +1299,7 @@ document.querySelectorAll('.kit-option').forEach(opt => {
         document.querySelectorAll('.kit-option').forEach(o => o.classList.remove('active-kit'));
         opt.classList.add('active-kit');
         document.getElementById('kitSelected').textContent = opt.textContent;
-        switchKit(opt.dataset.kit);
+        switchKit(opt.dataset.kit).then(saveState);
     });
 });
 document.addEventListener('click', (e) => {
@@ -1361,6 +1421,38 @@ function pokemonDance(trackName) {
 const flashStyle = document.createElement('style');
 flashStyle.textContent = '.drum-icon.flash svg circle, .drum-icon.flash svg ellipse, .drum-icon.flash svg rect, .drum-icon.flash svg polygon, .drum-icon.flash svg line { stroke: #2563EB !important; fill: #2563EB !important; } .drum-icon.flash { filter: drop-shadow(0 0 6px #2563EB); transform: scale(1.2); transition: transform 0.05s; }';
 document.head.appendChild(flashStyle);
+
+// Restore saved state
+const hadSave = loadState();
+if (hadSave) {
+    // Sync UI to restored state
+    document.getElementById('tempoInput').value = bpm;
+    document.getElementById('swingSlider').value = swing;
+    document.getElementById('swingVal').textContent = swing + '%';
+    document.querySelectorAll('.pat-btn').forEach(b => {
+        b.classList.toggle('active-pat', parseInt(b.dataset.pat) === currentPattern);
+    });
+    document.querySelectorAll('.chain-light').forEach(el => {
+        el.classList.toggle('lit', patternChain[parseInt(el.dataset.chain)]);
+    });
+    document.getElementById('brandName').textContent = KITS[currentKit].name;
+    document.getElementById('brandModel').textContent = KITS[currentKit].model;
+    document.getElementById('kitSelected').textContent = KITS[currentKit].name === "ELI'S" ? "ELI'S KIT" : KITS[currentKit].name + ' ' + KITS[currentKit].model;
+    document.querySelectorAll('.kit-option').forEach(o => {
+        o.classList.toggle('active-kit', o.dataset.kit === currentKit);
+    });
+    document.getElementById('footerSrc').textContent = 'SAMPLES: ORAMICS / ' + KITS[currentKit].model + ' PUBLIC DOMAIN';
+    // Reinit track gains for restored kit
+    trackGains.forEach(g => g.disconnect());
+    trackGains = [];
+    trackVolumes = TRACKS.map(() => 0.8);
+    trackMutes = TRACKS.map(() => false);
+    for (let t = 0; t < TRACKS.length; t++) {
+        const g = actx.createGain(); g.gain.value = 0.8;
+        g.connect(masterGain); trackGains.push(g);
+    }
+    initPatternsForKit(currentKit);
+}
 
 buildGrid();
 loadSamples().then(() => {
