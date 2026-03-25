@@ -718,12 +718,12 @@ const KITS = {
         tracks: [
             {name:'KICK', file:'kick.wav'},
             {name:'SNARE', file:'snare-h.wav'},
-            {name:'HI-HAT CLOSED', file:'hihat-closed.wav'},
-            {name:'HI-HAT OPEN', file:'hihat-open.wav'},
+            {name:'HI-HAT CLOSED', file:'hihat-closed.wav', vol:0.55},
+            {name:'HI-HAT OPEN', file:'hihat-open.wav', vol:0.55},
             {name:'TOM 1', file:'tom-h.wav'},
             {name:'TOM 2', file:'tom-m.wav'},
             {name:'FLOOR TOM', file:'tom-l.wav'},
-            {name:'RIDE', file:'ride.wav'},
+            {name:'RIDE', file:'ride.wav', vol:0.45},
         ]
     },
     cr78: {
@@ -837,6 +837,8 @@ function saveState() {
         bpm,
         swing,
         patternChain,
+        trackVolumes: Array.from(trackVolumes),
+        trackMutes: Array.from(trackMutes),
         allPatterns: {},
     };
     for (const kitId of Object.keys(allPatterns)) {
@@ -857,6 +859,14 @@ function loadState() {
         if (state.patternChain) { patternChain = state.patternChain; }
         if (state.currentKit && KITS[state.currentKit]) { currentKit = state.currentKit; TRACKS = KITS[currentKit].tracks; }
         if (state.currentPattern !== undefined) { currentPattern = state.currentPattern; }
+        if (state.trackVolumes) {
+            trackVolumes = state.trackVolumes.slice(0, TRACKS.length);
+            while (trackVolumes.length < TRACKS.length) trackVolumes.push(0.8);
+        }
+        if (state.trackMutes) {
+            trackMutes = state.trackMutes.slice(0, TRACKS.length);
+            while (trackMutes.length < TRACKS.length) trackMutes.push(false);
+        }
         if (state.allPatterns) {
             for (const kitId of Object.keys(state.allPatterns)) {
                 if (!KITS[kitId]) continue;
@@ -879,7 +889,7 @@ function loadState() {
     }
 }
 
-let trackVolumes = TRACKS.map(() => 0.8);
+let trackVolumes = TRACKS.map(t => t.vol ?? 0.8);
 let trackMutes = TRACKS.map(() => false);
 
 const actx = new (window.AudioContext || window.webkitAudioContext)();
@@ -912,12 +922,12 @@ async function switchKit(kitId) {
     currentKit = kitId;
     TRACKS = KITS[kitId].tracks;
     initPatternsForKit(kitId);
-    trackVolumes = TRACKS.map(() => 0.8);
+    trackVolumes = TRACKS.map(t => t.vol ?? 0.8);
     trackMutes = TRACKS.map(() => false);
     trackGains.forEach(g => g.disconnect());
     trackGains = [];
     for (let t = 0; t < TRACKS.length; t++) {
-        const g = actx.createGain(); g.gain.value = 0.8;
+        const g = actx.createGain(); g.gain.value = trackVolumes[t];
         g.connect(masterGain); trackGains.push(g);
     }
     document.getElementById('brandName').textContent = KITS[kitId].name;
@@ -1442,13 +1452,11 @@ if (hadSave) {
         o.classList.toggle('active-kit', o.dataset.kit === currentKit);
     });
     document.getElementById('footerSrc').textContent = 'SAMPLES: ORAMICS / ' + KITS[currentKit].model + ' PUBLIC DOMAIN';
-    // Reinit track gains for restored kit
+    // Reinit track gains for restored kit using restored volumes
     trackGains.forEach(g => g.disconnect());
     trackGains = [];
-    trackVolumes = TRACKS.map(() => 0.8);
-    trackMutes = TRACKS.map(() => false);
     for (let t = 0; t < TRACKS.length; t++) {
-        const g = actx.createGain(); g.gain.value = 0.8;
+        const g = actx.createGain(); g.gain.value = trackVolumes[t];
         g.connect(masterGain); trackGains.push(g);
     }
     initPatternsForKit(currentKit);
