@@ -1455,6 +1455,7 @@ if (hadSave) {
 }
 
 buildGrid();
+if (hadSave) refreshGrid();
 loadSamples().then(() => {
     document.getElementById('stepDisplay').textContent = 'READY';
     setTimeout(scaleToFit, 50);
